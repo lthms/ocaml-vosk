@@ -1,3 +1,7 @@
+.PHONY: build
+build: ocaml-vosk.opam
+	dune build -p ocaml-vosk
+
 .PHONY: opam-setup-local-switch
 opam-setup-local-switch:
 	@echo "Checking for existing local opam switch..."
@@ -12,6 +16,7 @@ opam-setup-local-switch:
 %.opam: opam-setup-local-switch dune-project
 	dune build $@
 
+.PHONY: build-deps
 build-deps: ocaml-vosk.opam
 	opam update
 	opam pin ocaml-vosk . --no-action -y
