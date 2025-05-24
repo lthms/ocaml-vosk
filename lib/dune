@@ -1,0 +1,4 @@
+(library
+ (name vosk)
+ (modules vosk)
+ (public_name ocaml-vosk))

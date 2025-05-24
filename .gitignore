@@ -1,0 +1,12 @@
+_build/
+*.exe
+*.o
+*.cmi
+*.cmo
+*.cma
+*.cmx
+*.cmxa
+*.a
+.merlin
+_opam/
+*.opam
