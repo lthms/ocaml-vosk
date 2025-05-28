@@ -24,4 +24,12 @@ let vosk_recognizer_new =
 let vosk_recognizer_free =
   foreign "vosk_recognizer_free" (ptr vosk_recognizer @-> returning void)
 
+let vosk_recognizer_accept_waveform =
+  foreign "vosk_recognizer_accept_waveform"
+    (ptr vosk_recognizer @-> ptr char @-> int @-> returning int)
+
+let vosk_recognizer_final_result =
+  foreign "vosk_recognizer_final_result"
+    (ptr vosk_recognizer @-> returning string)
+
 let vosk_set_log_level = foreign "vosk_set_log_level" (int @-> returning void)

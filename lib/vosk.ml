@@ -1,5 +1,6 @@
 type model = Bindings.vosk_model Ctypes_static.ptr
 type recognizer = Bindings.vosk_recognizer Ctypes_static.ptr
+type error = Vosk_exception | Invalid_ffi_result
 
 module Wav = Wav
 
@@ -26,6 +27,17 @@ let new_recognizer ~sw model rate =
   if Ctypes.is_null ptr then failwith "vosk_recognizer_new failed";
   Eio.Switch.on_release sw (fun () -> Bindings.vosk_recognizer_free ptr);
   ptr
+
+let accept_waveform recognizer buffer =
+  let ptr = Ctypes.bigarray_start Ctypes.array1 (Cstruct.to_bigarray buffer) in
+  let len = buffer.Cstruct.len in
+  match Bindings.vosk_recognizer_accept_waveform recognizer ptr len with
+  | 1 -> Ok true
+  | 0 -> Ok false
+  | -1 -> Error Vosk_exception
+  | _otherwise -> Error Invalid_ffi_result
+
+let final_result = Bindings.vosk_recognizer_final_result
 
 let with_recognizer model rate k =
   Eio.Switch.run @@ fun sw -> k (new_recognizer ~sw model rate)

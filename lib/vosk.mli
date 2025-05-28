@@ -1,3 +1,5 @@
+type error = Vosk_exception | Invalid_ffi_result
+
 val set_log_level : [< `Default | `Disabled | `Verbose ] -> unit
 
 type model
@@ -10,7 +12,9 @@ type recognizer
 
 val new_recognizer : sw:Eio.Switch.t -> model -> float -> recognizer
 val with_recognizer : model -> float -> (recognizer -> 'a) -> 'a
+val accept_waveform : recognizer -> Cstruct.t -> (bool, error) result
+val final_result : recognizer -> string
 
 module Wav : sig
-  val rate_from_path : _ Eio.Path.t -> float
+  val from_path : _ Eio.Path.t -> float * Cstruct.t
 end
