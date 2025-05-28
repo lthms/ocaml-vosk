@@ -1,6 +1,6 @@
 .PHONY: build
-build: ocaml-vosk.opam
-	dune build -p ocaml-vosk
+build: vosk-foreign.opam vosk-eio.opam
+	dune build -p vosk-eio
 
 .PHONY: opam-setup-local-switch
 opam-setup-local-switch:
@@ -17,12 +17,13 @@ opam-setup-local-switch:
 	dune build $@
 
 .PHONY: build-deps
-build-deps: ocaml-vosk.opam
-	opam update
-	opam pin ocaml-vosk . --no-action -y
-	opam install ocaml-vosk --deps-only -y
+build-deps: vosk-foreign.opam vosk-eio.opam
+	opam pin vosk-foreign . --no-action -y
+	opam install vosk-foreign --deps-only -y
+	opam pin vosk-eio . --no-action -y
+	opam install vosk-eio --deps-only -y
 
 .PHONY: build-dev-deps
-build-dev-deps: ocaml-vosk-dev.opam opam-setup-local-switch
-	opam pin ocaml-vosk-dev . -y
-	opam install ocaml-vosk-dev --deps-only -y
+build-dev-deps: vosk-dev.opam opam-setup-local-switch
+	opam pin vosk-dev . -y
+	opam install vosk-dev --deps-only -y

@@ -1,3 +1,3 @@
 (executable
  (name main)
- (libraries eio eio_main vosk))
+ (libraries eio eio_main vosk_eio))

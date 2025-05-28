@@ -1,0 +1,5 @@
+(library
+ (name vosk_eio)
+ (package vosk-eio)
+ (libraries vosk_foreign eio))
+

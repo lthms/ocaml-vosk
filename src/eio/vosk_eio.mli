@@ -11,6 +11,19 @@ val load_model :
     allocation of the module is performed in a dedicated job (to avoid blocking
     the main domain) *)
 
+val from_wav_file :
+  ?buffer_size:int ->
+  ?pool:Eio.Executor_pool.t ->
+  sw:Eio.Switch.t ->
+  model ->
+  _ Eio.Path.t ->
+  string Seq.t
+(** [from_wav_file ?pool ~sw model path] reads the contents of [path] as a WAV
+    file (more precisely, a PCB 16-bit mono audio file), and feeds the contents
+    to a recognizer initialized from [model]. If [pool] is passed, the calls to
+    the Vosk API are performed in one of the executors of the pool to avoid
+    blocking the main domain. *)
+
 type recognizer
 
 val new_recognizer :
@@ -24,10 +37,3 @@ val accept_waveform :
 val result : ?pool:Eio.Executor_pool.t -> recognizer -> string
 val partial_result : ?pool:Eio.Executor_pool.t -> recognizer -> string
 val final_result : ?pool:Eio.Executor_pool.t -> recognizer -> string
-
-module Wav : sig
-  val from_path :
-    sw:Eio.Std.Switch.t ->
-    _ Eio.Path.t ->
-    float * (Cstruct.t -> Cstruct.t) Seq.t
-end

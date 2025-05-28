@@ -1,5 +1,0 @@
-(library
- (name vosk)
- (package ocaml-vosk)
- (c_library_flags "-lvosk")
- (libraries ctypes ctypes.foreign eio))
