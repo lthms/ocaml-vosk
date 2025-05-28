@@ -13,8 +13,13 @@ type recognizer
 val new_recognizer : sw:Eio.Switch.t -> model -> float -> recognizer
 val with_recognizer : model -> float -> (recognizer -> 'a) -> 'a
 val accept_waveform : recognizer -> Cstruct.t -> (bool, error) result
+val result : recognizer -> string
+val partial_result : recognizer -> string
 val final_result : recognizer -> string
 
 module Wav : sig
-  val from_path : _ Eio.Path.t -> float * Cstruct.t
+  val from_path :
+    sw:Eio.Std.Switch.t ->
+    _ Eio.Path.t ->
+    float * (Cstruct.t -> Cstruct.t) Seq.t
 end

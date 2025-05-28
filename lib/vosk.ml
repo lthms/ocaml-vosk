@@ -37,6 +37,8 @@ let accept_waveform recognizer buffer =
   | -1 -> Error Vosk_exception
   | _otherwise -> Error Invalid_ffi_result
 
+let result = Bindings.vosk_recognizer_result
+let partial_result = Bindings.vosk_recognizer_partial_result
 let final_result = Bindings.vosk_recognizer_final_result
 
 let with_recognizer model rate k =

@@ -16,10 +16,7 @@ let find_subchunk r name =
     Eio.Flow.read_exact r buffer;
     let current_name = Cstruct.to_string ~off:0 ~len:4 buffer in
     let size = Cstruct.LE.get_uint32 buffer 4 in
-    if current_name = name then (
-      let subchunk = Cstruct.create (Int32.to_int size) in
-      Eio.Flow.read_exact r subchunk;
-      subchunk)
+    if current_name = name then Int32.to_int size
     else
       let size = Optint.Int63.of_int32 size in
       let to_skip =
@@ -33,6 +30,33 @@ let find_subchunk r name =
   ignore (Eio.File.seek r (Optint.Int63.of_int 12) `Set);
   aux ()
 
+let read_subchunk r name =
+  let size = find_subchunk r name in
+  let buffer = Cstruct.create size in
+  Eio.Flow.read_exact r buffer;
+  buffer
+
+type subchunk_resource =
+  | Subchunk_resource : {
+      resource : [> Eio.Flow.source_ty ] Eio.Resource.t;
+      mutable remaining_bytes : int;
+    }
+      -> subchunk_resource
+
+let to_seq (Subchunk_resource r) =
+  Seq.of_dispenser (fun () ->
+      if r.remaining_bytes > 0 then
+        Some
+          (fun buffer ->
+            let buffer =
+              Cstruct.sub buffer 0
+                (min r.remaining_bytes (Cstruct.length buffer))
+            in
+            Eio.Flow.read_exact r.resource buffer;
+            r.remaining_bytes <- r.remaining_bytes - Cstruct.length buffer;
+            buffer)
+      else None)
+
 module Fmt_subchunk : sig
   val audio_format : subchunk -> int
   val num_channels : subchunk -> int
@@ -45,10 +69,10 @@ end = struct
   let bits_per_sample t = Cstruct.LE.get_uint16 t 14
 end
 
-let from_path path =
-  Eio.Path.with_open_in path @@ fun r ->
+let from_path ~sw path =
+  let r = Eio.Path.open_in ~sw path in
   assert_is_wav r;
-  let fmt = find_subchunk r "fmt " in
+  let fmt = read_subchunk r "fmt " in
   (* PCM *)
   assert (Fmt_subchunk.audio_format fmt = 1);
   (* Mono *)
@@ -56,5 +80,5 @@ let from_path path =
   (* 16-bit *)
   assert (Fmt_subchunk.bits_per_sample fmt = 16);
   let rate = Int32.to_float (Fmt_subchunk.sample_rate fmt) in
-  let data = find_subchunk r "data" in
-  (rate, data)
+  let data_len = find_subchunk r "data" in
+  (rate, to_seq (Subchunk_resource { resource = r; remaining_bytes = data_len }))
