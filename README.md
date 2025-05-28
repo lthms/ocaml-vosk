@@ -1,11 +1,13 @@
-This is a simple OCaml project.
+# OCaml Vosk Bindings
 
-To build:
-```
-dune build
-```
+This repository provides a collection of Opam packages that allows to call the
+Vosk toolkit in OCaml.
 
-To run:
-```
-dune exec bin/main
-```
+## Status
+
+- `vosk-foreign` (Low-level bindings that calls the Vosk Toolkit): **Incomplete**
+- `vosk-eio` (Safe high-level API leveraging the EIO runtime): Incomplete
+
+## Examples
+
+See `examples/main.ml`.
