@@ -69,9 +69,14 @@ let final_result ?pool r =
 let with_recognizer model rate k =
   Eio.Switch.run @@ fun sw -> k (new_recognizer ~sw model rate)
 
-let from_wav_file ?(buffer_size = 4096) ?pool ~sw m path =
+let from_wav_file ?buffer_size ?pool ~sw m path =
   let rate, data = Wav.from_path ~sw path in
   let r = new_recognizer ?pool ~sw m rate in
+  let buffer_size =
+    match buffer_size with
+    | Some s -> s
+    | None -> (* Chunks of 20ms by default. *) Float.to_int (rate *. 0.04)
+  in
   let buffer = Cstruct.create buffer_size in
   let was_silence = ref true in
   Seq.append
