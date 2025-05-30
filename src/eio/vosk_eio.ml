@@ -50,14 +50,21 @@ let accept_waveform ?pool recognizer buffer =
   | -1 -> Error Vosk_exception
   | _otherwise -> Error Invalid_ffi_result
 
+let from_json m str =
+  let open Yojson.Basic.Util in
+  Yojson.Basic.from_string str |> member m |> to_string
+
 let result ?pool r =
-  run_protect ?pool @@ fun () -> Vosk_foreign.vosk_recognizer_result r
+  run_protect ?pool @@ fun () ->
+  Vosk_foreign.vosk_recognizer_result r |> from_json "text"
 
 let partial_result ?pool r =
-  run_protect ?pool @@ fun () -> Vosk_foreign.vosk_recognizer_partial_result r
+  run_protect ?pool @@ fun () ->
+  Vosk_foreign.vosk_recognizer_partial_result r |> from_json "partial"
 
 let final_result ?pool r =
-  run_protect ?pool @@ fun () -> Vosk_foreign.vosk_recognizer_final_result r
+  run_protect ?pool @@ fun () ->
+  Vosk_foreign.vosk_recognizer_final_result r |> from_json "text"
 
 let with_recognizer model rate k =
   Eio.Switch.run @@ fun sw -> k (new_recognizer ~sw model rate)
@@ -75,10 +82,11 @@ let from_wav_file ?(buffer_size = 4096) ?pool ~sw m path =
          | Ok accept_res ->
              if accept_res && not !was_silence then (
                was_silence := accept_res;
-               List.to_seq [ result r ])
+               List.to_seq [ result ?pool r ])
              else (
                was_silence := accept_res;
                Seq.empty)
          | Error _err -> failwith "something went wrong")
        data)
-    (fun () -> Seq.Cons (partial_result r, Seq.empty))
+    (fun () -> Seq.Cons (final_result r, Seq.empty))
+  |> Seq.filter (( <> ) "")

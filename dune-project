@@ -22,7 +22,7 @@
  (maintainers "Thomas Letan <lthms@soap.coffee>")
  (homepage "https://github.com/lthms/ocaml-vosk")
  (documentation "https://github.com/lthms/ocaml-vosk#readme")
- (depends dune vosk-foreign eio))
+ (depends dune vosk-foreign eio yojson))
 
 (package
  (allow_empty)
