@@ -1,6 +1,6 @@
 (library
  (name vosk_foreign)
- (package vosk-foreign)
+ (public_name vosk-foreign)
  (c_library_flags "-lvosk")
  (libraries ctypes ctypes.foreign))
 
