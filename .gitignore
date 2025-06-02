@@ -9,4 +9,4 @@ _build/
 *.a
 .merlin
 _opam/
-*.opam
+*.install
